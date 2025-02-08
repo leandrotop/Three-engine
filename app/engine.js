@@ -33,7 +33,7 @@ window._engine_pegar_id = function () {
     return engine.info.id
 }
 
-window._engine_abrir_alerta = function (_html, _texto) {
+window._engine_abrir_alerta = function (_html, _texto, _funcao) {
     _l_alerta_div = document.getElementById("alerta")
     _l_alerta_div.innerHTML = _html 
     if (_html == "alerta") {
@@ -42,6 +42,17 @@ window._engine_abrir_alerta = function (_html, _texto) {
             <h3 style="font-family: Arial, Helvetica, sans-serif; font-weight: 200;">${_texto}</h3>
             <div style="display: flex; justify-content: end; width: 100%; padding-top: 10px;">
                 <button style="background-color: #21212b; padding: 10px;" onclick="_engine_fechar_alerta()">Continue</button>
+            </div>
+        </div>
+        `
+    }
+    if (_html == "alerta_funcao") {
+        _l_alerta_div.innerHTML = `
+        <div style="background-color: #191A24; padding: 10px; width: 300px; margin: 10px;">
+            <h3 style="font-family: Arial, Helvetica, sans-serif; font-weight: 200;">${_texto}</h3>
+            <div style="display: flex; justify-content: end; width: 100%; padding-top: 10px;">
+                <button style="background-color: #21212b; width: 50%; padding: 10px;" onclick="${_funcao}">continue</button>
+                <button style="background-color: #21212b; width: 50%; padding: 10px; margin-left: 2px;" onclick="_engine_fechar_alerta()">Cancel</button>
             </div>
         </div>
         `
@@ -59,6 +70,7 @@ window._engine_abrir_alerta = function (_html, _texto) {
     }
     _l_alerta_div.style.display = "flex"
 }
+
 window._engine_fechar_alerta = function () {
     _l_alerta_div = document.getElementById("alerta")
     _l_alerta_div.style.display = "none"
@@ -219,6 +231,32 @@ window._engine_arquivo_objeto_criar_objeto = function (_nome) {
     }
 }
 
+window._engine_arquivo_objeto_deletar_objeto = function (_nome) {
+    if (!_engine_arquivo_objeto_encontra_objeto(_nome).resultado) {
+        return {
+            resultado: false,
+            codigo: "2-10",
+            erro: "This object does not exist."
+        };
+    }
+    if (_g_selecionado_pasta_object == null) {
+        return {
+            resultado: false,
+            codigo: "2-11",
+            erro: "No folder selected."
+        };
+    }
+    if (engine.object[_g_selecionado_pasta_object][_nome]) {
+        delete engine.object[_g_selecionado_pasta_object][_nome];
+        return { resultado: true };
+    }
+    return {
+        resultado: false,
+        codigo: "2-12",
+        erro: "Error deleting object."
+    };
+};
+
 window._engine_arquivo_objeto_encontra_objeto = function (_nome) {
     for (let _key_pasta in engine.object) {
         for (let _key_objeto in engine.object[_key_pasta]) {
@@ -262,12 +300,12 @@ window._engine_arquivo_objeto_pegar_objeto = function (_nome) {
 
 /*
 
-███████ ██████  ██ ████████  ██████  ██████      ██     ██  ██████  ██████  ██      ██████  
-██      ██   ██ ██    ██    ██    ██ ██   ██     ██     ██ ██    ██ ██   ██ ██      ██   ██ 
-█████   ██   ██ ██    ██    ██    ██ ██████      ██  █  ██ ██    ██ ██████  ██      ██   ██ 
-██      ██   ██ ██    ██    ██    ██ ██   ██     ██ ███ ██ ██    ██ ██   ██ ██      ██   ██ 
-███████ ██████  ██    ██     ██████  ██   ██      ███ ███   ██████  ██   ██ ███████ ██████  
-                                                                                                                           
+ █████  ██████   ██████  ██    ██ ██ ██    ██  ██████      ██     ██  ██████  ██████  ██      ██████  
+██   ██ ██   ██ ██    ██ ██    ██ ██ ██    ██ ██    ██     ██     ██ ██    ██ ██   ██ ██      ██   ██ 
+███████ ██████  ██    ██ ██    ██ ██ ██    ██ ██    ██     ██  █  ██ ██    ██ ██████  ██      ██   ██ 
+██   ██ ██   ██ ██ ▄▄ ██ ██    ██ ██  ██  ██  ██    ██     ██ ███ ██ ██    ██ ██   ██ ██      ██   ██ 
+██   ██ ██   ██  ██████   ██████  ██   ████    ██████       ███ ███   ██████  ██   ██ ███████ ██████  
+                    ▀▀                                                                                                           
 */ 
 
 window._engine_arquivo_world_criar_pasta = function (_nome) {
@@ -354,6 +392,44 @@ window._engine_arquivo_objeto_encontra_objeto = function (_nome) {
         codigo: "2-4",
         erro: "This object does not exist."
     }
+}
+
+/*
+
+ ██████  ██████  ███    ███ ██████   ██████  ███    ██ ███████ ███    ██ ████████ ███████ ███████ 
+██      ██    ██ ████  ████ ██   ██ ██    ██ ████   ██ ██      ████   ██    ██    ██      ██      
+██      ██    ██ ██ ████ ██ ██████  ██    ██ ██ ██  ██ █████   ██ ██  ██    ██    █████   ███████ 
+██      ██    ██ ██  ██  ██ ██      ██    ██ ██  ██ ██ ██      ██  ██ ██    ██    ██           ██ 
+ ██████  ██████  ██      ██ ██       ██████  ██   ████ ███████ ██   ████    ██    ███████ ███████ 
+                                                                                                  
+*/
+
+window._engine_abrir_componente_alerta = function (_objeto) {
+    _l_alerta_div = document.getElementById("alerta")
+    _l_alerta_div.innerHTML = `geometria
+        <div style="background-color: #21212b; padding: 10px; width: 300px; margin: 10px;">
+            <button style="width: calc(100% - 20px); border-left: solid 5px #ff0000; margin-top: 10px; text-align: left; margin-left: 10px; margin-bottom: 2px; padding: 10px;">Geometry</button>
+            <div style="display: flex; flex-direction: column; justify-content: end; width: 100%;">
+                <button style="width: calc(100% - 30px); border-left: solid 5px #ffc6c6; margin-top: 5px; text-align: left; margin-left: 20px; margin-bottom: 2px; padding: 10px;">Box</button>
+                <button style="width: calc(100% - 30px); border-left: solid 5px #ffc6c6; margin-top: 5px; text-align: left; margin-left: 20px; margin-bottom: 2px; padding: 10px;">Sphere</button>
+            </div>
+            <button style="width: calc(100% - 20px); border-left: solid 5px #ffd000; margin-top: 10px; text-align: left; margin-left: 10px; margin-bottom: 2px; padding: 10px;">Models 3d</button>
+            <div style="display: flex; flex-direction: column; justify-content: end; width: 100%; padding-top: 10px;">
+                <button style="width: calc(100% - 30px); border-left: solid 5px #fff5c8; margin-top: 5px; text-align: left; margin-left: 20px; margin-bottom: 2px; padding: 10px;">OBJ</button>
+                <button style="width: calc(100% - 30px); border-left: solid 5px #fff5c8; margin-top: 5px; text-align: left; margin-left: 20px; margin-bottom: 2px; padding: 10px;">DAE</button>
+            </div>
+            <div style="display: flex; justify-content: end; width: 100%; padding-top: 10px;">
+                <button style="background-color: #191A24; width: 100%; padding: 10px;" onclick="_engine_fechar_alerta()">Cancel</button>
+            </div>
+        </div>
+        `
+    _l_alerta_div.style.display = "flex"
+}
+
+window._engine_fechar_componente_alerta = function () {
+    _l_alerta_div = document.getElementById("alerta")
+    _l_alerta_div.style.display = "none"
+    _l_alerta_div.innerHTML = '' 
 }
 
 /*

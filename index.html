@@ -114,7 +114,7 @@
                             <button style="width: 40px; margin-left: 2px; padding: 10px;" onclick="_abrir_mais_opecao_projeto('${_nome}')">+</button>
                         </div>
                         <div style="display: none;" id="opecao-${_nome}">
-                            <button style="width: 230px; margin-left: 15px; padding: 10px; margin-top: 2px;" onclick="">Save</button>
+                            <button style="width: 230px; margin-left: 15px; padding: 10px; margin-top: 2px;" onclick="_engine_projeto_atualizar('${_nome}')">Save</button>
                             <button style="width: 230px; margin-left: 15px; padding: 10px; margin-top: 2px;" onclick="">Delete</button>
                             <button style="width: 230px; margin-left: 15px; padding: 10px; margin-top: 2px;" onclick="">Edit</button>
                             <button style="width: 230px; margin-left: 15px; padding: 10px; margin-top: 2px;" onclick="">Export</button>
@@ -222,11 +222,12 @@
     }
 
     window._abrir_pasta_world = function (_pasta) {
-        if (document.getElementById(`pasta_${_pasta}`).style.display == "none") {
-            document.getElementById(`pasta_${_pasta}`).style.display = "block"
-        } else {
-            document.getElementById(`pasta_${_pasta}`).style.display = "none"
+        _engine_arquivo_world_abrir_pasta(_pasta)
+
+        for (let _pastas in engine.world) {
+            document.getElementById(`pasta_${_pastas}`).style.display = "none"
         }
+        document.getElementById(`pasta_${_pasta}`).style.display = "block"
     }
 
     window._mais_detalhes_world = function (_pasta) {
@@ -276,27 +277,40 @@
             <div style="width: 100%;">
                 <button style="width: calc(100% - 20px); border-left: solid 5px #ff0000; text-align: left; margin-left: 10px; margin-bottom: 2px; padding: 10px;" onclick="_abrir_pasta_objeto('${_pasta}')">${_pasta}</button>
             </div>
+            <button style="width: calc(100% - 20px); border-left: solid 5px #ffbb00; margin-left: 10px; margin-bottom: 10px; padding: 5px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="_mais_detalhes_objeto('${_pasta}')">More details</button>
             <div style="display: none;" id="pasta_${_pasta}">
-                <button style="width: calc(100% - 20px); border-left: solid 5px #ffbb00; margin-left: 10px; margin-bottom: 10px; padding: 5px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="_mais_detalhes_objeto('${_pasta}')">More details</button>
             </div>`
         }
     }
 
     window._abrir_pasta_objeto = function (_pasta) {
-        if (document.getElementById(`pasta_${_pasta}`).style.display == "none") {
-            document.getElementById(`pasta_${_pasta}`).style.display = "block"
-        } else {
-            document.getElementById(`pasta_${_pasta}`).style.display = "none"
+        _engine_arquivo_objeto_abrir_pasta(_pasta)
+
+        for (let _pastas in engine.object) {
+            document.getElementById(`pasta_${_pastas}`).style.display = "none"
+        }
+        document.getElementById(`pasta_${_pasta}`).style.display = "block"
+
+        document.getElementById(`pasta_${_pasta}`).innerHTML = ""
+        for (let _objetos in engine.object[_pasta]) {
+            document.getElementById(`pasta_${_pasta}`).innerHTML += `
+            <div style="width: 100%;">
+                <button style="width: calc(100% - 148px); border-left: solid 5px #0004ff; margin-left: 20px; margin-bottom: 10px; padding: 10px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="">${_objetos}</button>
+                <button style="width: 55px; margin-bottom: 10px; padding: 10px;" onclick="_editar_obejeto('${_objetos}')">Edit</button>
+                <button style="width: 55px; margin-bottom: 10px; padding: 10px;" onclick="_deletar_objeto('${_objetos}', '${_pasta}', true)">Delete</button>
+            </div>
+            `
         }
     }
 
     window._mais_detalhes_objeto = function (_pasta) {
+        _abrir_pasta_objeto(_pasta)
         _engine_abrir_alerta(`
         <div style="background-color: #191A24; padding: 10px; width: 300px; margin: 10px;">
-            <button style="background-color: #21212b; width: 100%; padding: 10px; margin-left: 2px;" onclick="_engine_abrir_alerta('input', '_criar_objeto()')">Create Object</button>
-            <button style="background-color: #21212b; width: 100%; padding: 10px; margin-left: 2px; margin-top: 5px;" onclick="_deletar_pasta_objeto('${_pasta}')">Delete</button>
+            <button style="background-color: #21212b; width: 100%; padding: 10px;" onclick="_engine_abrir_alerta('input', '_criar_objeto()')">Create Object</button>
+            <button style="background-color: #21212b; width: 100%; padding: 10px; margin-top: 5px;" onclick="_deletar_pasta_objeto('${_pasta}')">Delete</button>
             <div style="display: flex; justify-content: end; width: 100%; padding-top: 10px;">
-                <button style="background-color: #21212b; width: 100%; padding: 10px; margin-left: 2px;" onclick="_engine_fechar_alerta()">Cancel</button>
+                <button style="background-color: #21212b; width: 100%; padding: 10px;" onclick="_engine_fechar_alerta()">Cancel</button>
             </div>
         </div>
         `)
@@ -309,7 +323,32 @@
     }
 
     window._criar_objeto = function () {
-        _engine_arquivo_objeto_criar_objeto(document.getElementById("input-alerta").value)
+        let _l_nome_objeto = document.getElementById("input-alerta").value
+        _engine_arquivo_objeto_criar_objeto(_l_nome_objeto)
+        _exibir_pastas_objeto()
+        _engine_fechar_alerta()
+
+        let _l_objeto_info = _engine_arquivo_objeto_encontra_objeto(_l_nome_objeto)
+        _abrir_pasta_objeto(_l_objeto_info.pasta)
+    }
+
+    window._deletar_objeto = function (_obejeto, _pasta, _alerta) {
+        if (_alerta) {
+            _engine_abrir_alerta("alerta_funcao", "Do you really want to delete the object?", `_deletar_objeto('${_obejeto}', '${_pasta}', false)`)
+        } else {
+            _engine_arquivo_objeto_deletar_objeto(_obejeto)
+            _abrir_pasta_objeto(_pasta)
+            _engine_fechar_alerta()
+        }
+    }
+
+    window._editar_obejeto = function (_obejeto) {
+        document.getElementById('arquivos').innerHTML = `
+        <div style="width: 100%;">
+            <button style="width: calc(100% - 77px); border-left: solid 5px #0004ff; margin-top: 10px; text-align: left; margin-left: 10px; margin-bottom: 2px; padding: 10px;">${_obejeto}</button>
+            <button style="width: 55px; margin-bottom: 10px; padding: 10px;" onclick="_engine_abrir_componente_alerta('${_obejeto}')">Add</button>
+        </div>
+        `
     }
 
 /*
