@@ -213,9 +213,37 @@
         for (let _pasta in engine.world) {
             document.getElementById('arquivos').innerHTML += `
             <div style="width: 100%;">
-                <button style="width: calc(100% - 20px); border-left: solid 5px #ff0000; text-align: left; margin-left: 10px; margin-bottom: 2px; padding: 10px;" onclick="">${_pasta}</button>
+                <button style="width: calc(100% - 20px); border-left: solid 5px #ff0000; text-align: left; margin-left: 10px; margin-bottom: 2px; padding: 10px;" onclick="_abrir_pasta_world('${_pasta}')">${_pasta}</button>
+            </div>
+            <div style="display: none;" id="pasta_${_pasta}">
+                <button style="width: calc(100% - 20px); border-left: solid 5px #ffbb00; margin-left: 10px; margin-bottom: 10px; padding: 5px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="_mais_detalhes_world('${_pasta}')">More details</button>
             </div>`
         }
+    }
+
+    window._abrir_pasta_world = function (_pasta) {
+        if (document.getElementById(`pasta_${_pasta}`).style.display == "none") {
+            document.getElementById(`pasta_${_pasta}`).style.display = "block"
+        } else {
+            document.getElementById(`pasta_${_pasta}`).style.display = "none"
+        }
+    }
+
+    window._mais_detalhes_world = function (_pasta) {
+        _engine_abrir_alerta(`
+        <div style="background-color: #191A24; padding: 10px; width: 300px; margin: 10px;">
+            <button style="background-color: #21212b; width: 100%; padding: 10px; margin-left: 2px;" onclick="_deletar_pasta_world('${_pasta}')">Delete</button>
+            <div style="display: flex; justify-content: end; width: 100%; padding-top: 10px;">
+                <button style="background-color: #21212b; width: 100%; padding: 10px; margin-left: 2px;" onclick="_engine_fechar_alerta()">Cancel</button>
+            </div>
+        </div>
+        `)
+    }
+
+    window._deletar_pasta_world = function (_pasta) {
+        _engine_arquivo_world_deletar_pasta(_pasta)
+        _exibir_pastas_world()
+        _engine_fechar_alerta()
     }
 
 /*
@@ -246,9 +274,42 @@
         for (let _pasta in engine.object) {
             document.getElementById('arquivos').innerHTML += `
             <div style="width: 100%;">
-                <button style="width: calc(100% - 20px); border-left: solid 5px #ff0000; text-align: left; margin-left: 10px; margin-bottom: 2px; padding: 10px;" onclick="">${_pasta}</button>
+                <button style="width: calc(100% - 20px); border-left: solid 5px #ff0000; text-align: left; margin-left: 10px; margin-bottom: 2px; padding: 10px;" onclick="_abrir_pasta_objeto('${_pasta}')">${_pasta}</button>
+            </div>
+            <div style="display: none;" id="pasta_${_pasta}">
+                <button style="width: calc(100% - 20px); border-left: solid 5px #ffbb00; margin-left: 10px; margin-bottom: 10px; padding: 5px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onclick="_mais_detalhes_objeto('${_pasta}')">More details</button>
             </div>`
         }
+    }
+
+    window._abrir_pasta_objeto = function (_pasta) {
+        if (document.getElementById(`pasta_${_pasta}`).style.display == "none") {
+            document.getElementById(`pasta_${_pasta}`).style.display = "block"
+        } else {
+            document.getElementById(`pasta_${_pasta}`).style.display = "none"
+        }
+    }
+
+    window._mais_detalhes_objeto = function (_pasta) {
+        _engine_abrir_alerta(`
+        <div style="background-color: #191A24; padding: 10px; width: 300px; margin: 10px;">
+            <button style="background-color: #21212b; width: 100%; padding: 10px; margin-left: 2px;" onclick="_engine_abrir_alerta('input', '_criar_objeto()')">Create Object</button>
+            <button style="background-color: #21212b; width: 100%; padding: 10px; margin-left: 2px; margin-top: 5px;" onclick="_deletar_pasta_objeto('${_pasta}')">Delete</button>
+            <div style="display: flex; justify-content: end; width: 100%; padding-top: 10px;">
+                <button style="background-color: #21212b; width: 100%; padding: 10px; margin-left: 2px;" onclick="_engine_fechar_alerta()">Cancel</button>
+            </div>
+        </div>
+        `)
+    }
+
+    window._deletar_pasta_objeto = function (_pasta) {
+        _engine_arquivo_objeto_deletar_pasta(_pasta)
+        _exibir_pastas_objeto()
+        _engine_fechar_alerta()
+    }
+
+    window._criar_objeto = function () {
+        _engine_arquivo_objeto_criar_objeto(document.getElementById("input-alerta").value)
     }
 
 /*
